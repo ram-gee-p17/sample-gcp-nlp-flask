@@ -10,7 +10,7 @@ class TopicAnalyser:
         self.data = data
 
     # get the topic analysis of the whole text
-    def display_topics(model, feature_names, no_top_words):
+    def display_topics(self, model, feature_names, no_top_words):
         for topic_idx, topic in enumerate(model.components_):
             return " ".join([feature_names[i] for i in topic.argsort()[:-no_top_words - 1:-1]])
 
@@ -18,7 +18,10 @@ class TopicAnalyser:
         # TODO: participants should consider changing dataset to match the brief.
         if (self.data == None):
             dataset = fetch_20newsgroups(shuffle=True, random_state=1, remove=('headers', 'footers', 'quotes'))
+            print(dataset)
             documents = dataset.data
+        else:
+            documents = list(self.data)
 
         # HYPERPARAMETERS: Consider tuning
         no_features = 1000

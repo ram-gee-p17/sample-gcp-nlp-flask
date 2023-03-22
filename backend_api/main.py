@@ -6,6 +6,8 @@ from google.cloud import datastore
 from google.cloud import language_v1 as language
 import os
 
+from backend_api.TopicAnalyser import TopicAnalyser
+
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "key.json"
 
 """
@@ -165,6 +167,29 @@ class Entity(Resource):
         datastore_client.delete(datastore_client.key("Sentences", entity_id))
 
         return {}
+
+
+@api.route("/api/text/topics")
+class Text(Resource):
+
+    @api.expect(parser)
+    def post(self):
+        """
+        This POST request will accept a 'text', analyze the sentiment analysis of the first sentence, store
+        the result to datastore as a 'Sentence', and also return the result.
+        """
+        datastore_client = datastore.Client()
+
+        args = parser.parse_args()
+        text = args["text"]
+
+        # Get the sentiment score of each sentence of the analysis
+        # analyzed = TopicAnalyser(model_type="lda", data=text).analyse()
+        analyzed = TopicAnalyser().analyse()
+
+        print("Analyzed result: " + analyzed)
+
+        return analyzed
 
 
 @app.errorhandler(500)
