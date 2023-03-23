@@ -1,13 +1,34 @@
 import urllib.request
 from bs4 import BeautifulSoup
-import json
+import re
 
-response = urllib.request.urlopen('https://www.db.com/news/detail/20230317-deutsche-bank-reports-continued-delivery-of-transformation-in-2022-and-clear-targets-for-2025?language_id=1')
+def getSubstring(ch1,ch2,str):
+    m = re.search(ch1+'(.+?)'+ch2, str)
+    if m:
+        s2 = m.group(1)
+    return s2
 
-html_doc = response.read()
+def fetchArticleDeatils(url):
+    response = urllib.request.urlopen(url)
+    html_doc = response.read()
+    soup = BeautifulSoup(html_doc, 'html.parser')
+    return (re.compile(r'<[^>]+>')).sub('',str(soup.find("div",{"class":"rich-text"})))
+    
 
-soup = BeautifulSoup(html_doc, 'html.parser')
+def pushArticleToDataStore(linkfile):
+    file1 = open(linkfile, 'r')
+    Lines = file1.readlines()
+    
+    count = 0
+    # Strips the newline character
+    for line in Lines:
+        count += 1
+        response=fetchArticleDeatils(line)
+        filename=(line.split("/")[-1]).split("?")[-2]+".txt"
+        #print("Link will be "+line+" \n & filename - ",filename)
+        file2 = open(filename, 'w')
+        file2.write(str(response))
+        file2.close()
 
-article_text=soup.find("div",{"class":"rich-text"})
-                       
-print (article_text.text)   
+if __name__ == "__main__":
+    pushArticleToDataStore('articlelinks.txt')
