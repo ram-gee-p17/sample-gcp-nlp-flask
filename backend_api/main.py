@@ -5,6 +5,10 @@ from flask_restx import Resource, Api
 from google.cloud import datastore
 from google.cloud import language_v1 as language
 import os
+import requests
+from requests.auth import HTTPDigestAuth
+import json
+import re
 
 from backend_api.TopicAnalyser import TopicAnalyser
 
@@ -170,7 +174,7 @@ class Entity(Resource):
 
 
 @api.route("/api/text/topics")
-class Text(Resource):
+class Topic(Resource):
 
     @api.expect(parser)
     def post(self):
@@ -180,16 +184,25 @@ class Text(Resource):
         """
         datastore_client = datastore.Client()
 
-        args = parser.parse_args()
-        text = args["text"]
+        url = "https://www.db.com/api/content/limit/15/offset/0/render/false/type/json/query/ +((categories:adHocRelease categories:event1 categories:mediaRelease categories:news categories:research) && (categories:africa categories:americas1 categories:asiapacific categories:europeexGermany categories:germany categories:middleEast categories:art categories:assetManagement categories:awards categories:capitalMarkets categories:careers categories:company1 categories:corporateCitizenship categories:corporateProducts categories:cryptocurrencies categories:culture categories:digitalBankingServices categories:digitalisation categories:diversity categories:education categories:employeeEngagement categories:entrepreneurship categories:financialResults categories:history categories:investmentBanking categories:managementLeadership categories:personnelAnnouncements categories:privateProducts categories:research3 categories:sports categories:strategy categories:sustainability categories:wealth))  +C03News.publishDate:[20150101000000 to 20231231235959] +conhost:8e29bc28-e0f6-40f1-930a-6258631a0985 +languageId:1 +deleted:false /orderby/C03News.publishDate desc"
+        # url = "https://www.db.com/media/news"
+        news_page = str(requests.get(url = url).text)
+        regex = r"a href=\\\"https:\\/\\/(www.db.com\S+?)\?language_id=1"
+        urls = re.finditer(regex, news_page)
+        # print("Analyzed result: " + news_page)
+        for urlNum, match in enumerate(urls, start=1):
+            print("Url #" + str(urlNum) + " is " + match.group(1))
+
+        # args = parser.parse_args()
+        # text = args["text"]
 
         # Get the sentiment score of each sentence of the analysis
         # analyzed = TopicAnalyser(model_type="lda", data=text).analyse()
-        analyzed = TopicAnalyser().analyse()
+        # analyzed = TopicAnalyser().analyse()
 
-        print("Analyzed result: " + analyzed)
+        # print("Analyzed result: " + analyzed)
 
-        return analyzed
+        return {}
 
 
 @app.errorhandler(500)

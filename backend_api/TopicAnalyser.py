@@ -16,7 +16,7 @@ class TopicAnalyser:
 
     def analyse(self):
         # TODO: participants should consider changing dataset to match the brief.
-        if (self.data == None):
+        if self.data is None:
             dataset = fetch_20newsgroups(shuffle=True, random_state=1, remove=('headers', 'footers', 'quotes'))
             print(dataset)
             documents = dataset.data
